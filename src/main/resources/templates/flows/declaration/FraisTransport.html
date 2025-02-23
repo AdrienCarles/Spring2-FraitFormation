@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Frais de transport - Déclaration de Frais</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+<header class="bg-primary text-white text-center py-4">
+    <h1>Frais de transport</h1>
+    <a th:href="@{'/MenuApplication'}" class="btn btn-outline-light mt-3">Revenir au menu</a>
+</header>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="progress mb-4" style="height: 20px;">
+                <div class="progress-bar bg-success progress-bar-striped progress-bar-animated"
+                     role="progressbar" style="width: 30%;" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100">
+                    Étape 2 sur 7
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h4>Type de transport avez-vous utilisé ?</h4>
+                </div>
+                <div class="card-body text-center">
+                    <form th:action="@{ ${flowExecutionUrl} + '&_eventId=FraisTransport2'}" method="post" class="mb-3">
+                        <input type="hidden" name="type_transport" value="Transport Payant">
+                        <button type="submit" class="btn btn-primary btn-lg w-100">Transport Payant</button>
+                    </form>
+                    <form th:action="@{ ${flowExecutionUrl} + '&_eventId=FraisTransport2'}" method="post">
+                        <input type="hidden" name="type_transport" value="Vehicule personnel">
+                        <button type="submit" class="btn btn-secondary btn-lg w-100">Vehicule personnel</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

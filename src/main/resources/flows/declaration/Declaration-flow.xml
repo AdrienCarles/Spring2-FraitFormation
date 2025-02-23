@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flow xmlns="http://www.springframework.org/schema/webflow"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/webflow
+                          http://www.springframework.org/schema/webflow/spring-webflow.xsd">
+
+    <!-- MenuDeclaration -->
+    <view-state id="MenuDeclaration" view="flows/declaration/MenuDeclaration" redirect="false">
+        <transition on="DetailFormation" to="DetailFormation" />
+    </view-state>
+
+    <!-- DetailFormation -->
+    <view-state id="DetailFormation" view="flows/declaration/DetailFormation">
+        <transition on="DetailFormation" to="DetailFormation"/>
+        <transition on="FraisTransport" to="FraisTransport">
+            <set name="flowScope.date" value="flowRequestContext.getRequestParameters().date" />
+            <set name="flowScope.lieu" value="flowRequestContext.getRequestParameters().lieu" />
+            <set name="flowScope.intitule" value="flowRequestContext.getRequestParameters().intitule" />
+        </transition>
+    </view-state>
+
+    <!-- FraisTransport -->
+    <view-state id="FraisTransport" view="flows/declaration/FraisTransport">
+        <transition on="DetailFormation" to="DetailFormation"/>
+        <transition on="FraisTransport" to="FraisTransport"/>
+        <transition on="FraisTransport2" to="FraisTransport2">
+            <set name="flowScope.type_transport" value="flowRequestContext.getRequestParameters().type_transport"/>
+        </transition>
+    </view-state>
+
+    <!-- FraisTransport2 -->
+    <view-state id="FraisTransport2" view="flows/declaration/FraisTransport2">
+        <transition on="DetailFormation" to="DetailFormation"/>
+        <transition on="FraisTransport" to="FraisTransport"/>
+        <transition on="FraisHebergement" to="FraisHebergement">
+            <set name="flowScope.lieu_depart" value="flowRequestContext.getRequestParameters().lieu_depart"/>
+            <set name="flowScope.facture_transport" value="flowRequestContext.getRequestParameters().facture_transport"/>
+            <set name="flowScope.montant_transport" value="flowRequestContext.getRequestParameters().montant_transport"/>
+        </transition>
+    </view-state>
+
+    <!-- FraisHebergement -->
+    <view-state id="FraisHebergement" view="flows/declaration/FraisHebergement">
+        <on-entry>
+            <evaluate expression="flowScope.fraisRestoInfos = new java.util.ArrayList()" />
+        </on-entry>
+        <transition on="DetailFormation" to="DetailFormation"/>
+        <transition on="FraisTransport" to="FraisTransport"/>
+        <transition on="FraisHebergement" to="FraisHebergement"/>
+        <transition on="FraisRestauration" to="FraisRestauration">
+            <set name="flowScope.type_hebergement" value="flowRequestContext.getRequestParameters().type_hebergement"/>
+            <set name="flowScope.facture_hebergement" value="flowRequestContext.getRequestParameters().facture_hebergement"/>
+            <set name="flowScope.montant_hebergement" value="flowRequestContext.getRequestParameters().montant_hebergement"/>
+        </transition>
+    </view-state>
+
+    <!-- FraisRestauration -->
+    <view-state id="FraisRestauration" view="flows/declaration/FraisRestauration">
+        <transition on="DetailFormation" to="DetailFormation"/>
+        <transition on="FraisTransport" to="FraisTransport"/>
+        <transition on="FraisHebergement" to="FraisHebergement"/>
+        <transition on="FraisRestauration" to="FraisRestauration"/>
+        <transition on="CoordonneesBancaires" to="CoordonneesBancaires">
+            <set name="flowScope.type_restauration" value="flowRequestContext.getRequestParameters().type_restauration"/>
+            <set name="flowScope.repas_petit_dejeuner" value="flowRequestContext.getRequestParameters().repas_petit_dejeuner"/>
+            <set name="flowScope.montant_petit_dejeuner" value="flowRequestContext.getRequestParameters().montant_petit_dejeuner" />
+            <set name="flowScope.facture_petit_dejeuner" value="flowRequestContext.getRequestParameters().facture_petit_dejeuner" />
+            <set name="flowScope.repas_dejeuner" value="flowRequestContext.getRequestParameters().repas_dejeuner"/>
+            <set name="flowScope.montant_dejeuner" value="flowRequestContext.getRequestParameters().montant_dejeuner" />
+            <set name="flowScope.facture_dejeuner" value="flowRequestContext.getRequestParameters().facture_dejeuner" />
+            <set name="flowScope.repas_diner" value="flowRequestContext.getRequestParameters().repas_diner"/>
+            <set name="flowScope.montant_diner" value="flowRequestContext.getRequestParameters().montant_diner" />
+            <set name="flowScope.facture_diner" value="flowRequestContext.getRequestParameters().facture_diner" />
+        </transition>
+    </view-state>
+
+    <!-- CoordonneesBancaires -->
+    <view-state id="CoordonneesBancaires" view="flows/declaration/CoordonneesBancaires">
+        <transition on="detailformation" to="DetailFormation"/>
+        <transition on="fraistransport" to="FraisTransport"/>
+        <transition on="fraishebergement" to="FraisHebergement"/>
+        <transition on="fraisrestauration" to="FraisRestauration"/>
+        <transition on="coordonneesbancaires" to="CoordonneesBancaires"/>
+        <transition on="transmission" to="Transmission">
+            <set name="flowScope.coordonneesbancaires" value="flowRequestContext.getRequestParameters().coordonneesbancaires"/>
+        </transition>
+    </view-state>
+
+    <!-- Transmission -->
+    <view-state id="Transmission" view="flows/declaration/Transmission">
+        <transition on="detailformation" to="DetailFormation"/>
+        <transition on="fraistransport" to="FraisTransport"/>
+        <transition on="fraishebergement" to="FraisHebergement"/>
+        <transition on="fraisrestauration" to="FraisRestauration"/>
+        <transition on="coordonneesbancaires" to="CoordonneesBancaires"/>
+        <transition on="transmission" to="Transmission"/>
+        <transition on="recapitulatif" to="Recapitulatif">
+            <evaluate expression="declarationController.sauvegarderDeclaration(flowRequestContext)" result="flowScope.declaration" />
+            <evaluate expression="restaurationController.sauvegarderRestaurationPetitDejeuner(flowRequestContext, flowScope.declaration.id)" />
+             <evaluate expression="restaurationController.sauvegarderRestaurationDejeuner(flowRequestContext, flowScope.declaration.id)" />
+              <evaluate expression="restaurationController.sauvegarderRestaurationDiner(flowRequestContext, flowScope.declaration.id)" />
+        </transition>
+    </view-state>
+
+    <!-- Recapitulatif -->
+    <view-state id="Recapitulatif" view="flows/declaration/Recapitulatif">
+    <on-entry>
+        <evaluate expression="loggingAspect.afficherFrais(flowScope.declaration)" />
+    </on-entry>
+    </view-state>
+
+    <global-transitions>
+        <transition on="Menu" to="MenuDeclaration"/>
+    </global-transitions>
+</flow>

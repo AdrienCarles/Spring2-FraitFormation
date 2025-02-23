@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Liste des Déclarations</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f4f8;
+        }
+
+        .card-custom {
+            border-radius: 15px;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+            background-color: #007bff;
+            color: white;
+        }
+
+        .table-container {
+            border-radius: 15px;
+            padding: 25px;
+            background: white;
+            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.07);
+        }
+
+        .table thead {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+        }
+
+        .btn-group .btn {
+            transition: transform 0.2s ease;
+        }
+
+        .badge-custom {
+            padding: 6px 10px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border-radius: 12px;
+        }
+
+        .status-badge-valide {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .status-badge-invalide {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .status-badge-attente {
+            background-color: #ffc107;
+            color: #212529;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container-fluid my-5">
+    <div class="card card-custom p-4 text-center mb-5">
+        <h1 class="fw-bold">📄 Liste des Déclarations</h1>
+    </div>
+
+    <div class="text-center my-4">
+        <div class="btn-group d-flex flex-wrap" role="group">
+            <a th:href="@{'/ListeDeclarations?statut=Valide'}" class="btn btn-outline-success">✅ Valides</a>
+            <a th:href="@{'/ListeDeclarations?statut=Invalide'}" class="btn btn-outline-danger">❌ Invalides</a>
+            <a th:href="@{'/ListeDeclarations?statut=En attente'}" class="btn btn-outline-warning">🟡 En attente</a>
+            <a th:href="@{'/ListeDeclarations'}" class="btn btn-outline-primary">📁 Toutes</a>
+        </div>
+    </div>
+
+    <div class="table-container mb-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark text-center">
+                <tr>
+                    <th>Statut</th>
+                    <th>Email</th>
+                    <th>Intitulé</th>
+                    <th>Date</th>
+                    <th>Lieu</th>
+                    <th>Transport</th>
+                    <th>Départ</th>
+                    <th>Transport (€)</th>
+                    <th>Facture Transport</th>
+                    <th>Hébergement</th>
+                    <th>Hébergement (€)</th>
+                    <th>Facture Hébergement</th>
+                    <th>Coord. Bancaires</th>
+                    <th>Restaurations</th>
+                    <th>Total (€)</th>
+                    <th th:if="${#request.isUserInRole('ROLE_1')}">Modifier Statut</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="declaration : ${listeDeclarations}" class="hover-zoom">
+                    <td class="text-center">
+                        <span th:classappend="${declaration.statut == 'Valide' ? 'status-badge-valide badge badge-custom'
+                        : (declaration.statut == 'Invalide' ? 'status-badge-invalide badge badge-custom'
+                        : 'status-badge-attente badge badge-custom')}">
+                            <span th:text="${declaration.statut}"></span>
+                        </span>
+                    </td>
+                    <td th:text="${declaration.user}"></td>
+                    <td th:text="${declaration.intitule}"></td>
+                    <td class="text-center" th:text="${#strings.substring(declaration.date, 0, 10)}"></td>
+                    <td th:text="${declaration.lieu}"></td>
+                    <td th:text="${declaration.typeTransport}"></td>
+                    <td th:text="${declaration.lieuDepart}"></td>
+                    <td class="text-end fw-bold" th:text="${declaration.montant_transport} + ' €'"></td>
+                    <td class="text-center" th:text="${declaration.nom_fichier_transport}"></td>
+                    <td th:text="${declaration.type_hebergement}"></td>
+                    <td class="text-end fw-bold" th:text="${declaration.montant_hebergement} + ' €'"></td>
+                    <td class="text-center" th:text="${declaration.nom_fichier_hebergement}"></td>
+                    <td class="text-center" th:text="${declaration.coordonneesbancaires}"></td>
+                    <td>
+                        <div th:if="${#lists.isEmpty(declaration.fraisRestoInfos)}" class="text-muted">Aucun frais</div>
+                        <table th:unless="${#lists.isEmpty(declaration.fraisRestoInfos)}" class="table table-bordered table-sm bg-white">
+                            <thead class="table-light text-center">
+                            <tr>
+                                <th>Repas</th>
+                                <th>Montant (€)</th>
+                                <th>Facture</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="restauration : ${declaration.fraisRestoInfos}">
+                                <td th:text="${restauration.typeRepas}"></td>
+                                <td class="text-end fw-bold" th:text="${restauration.montant} + ' €'"></td>
+                                <td class="text-center" th:text="${restauration.fichierJustificatif}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                    <td class="text-end fw-bold text-primary" th:text="${declaration.getTotalFrais()} + ' €'"></td>
+                    <td th:if="${#request.isUserInRole('ROLE_1')}" class="text-center">
+                        <form th:action="@{'/updateStatut/' + ${declaration.id}}" method="post" class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success btn-sm" name="statut" value="Valide">✅ Valide</button>
+                            <button type="submit" class="btn btn-danger btn-sm" name="statut" value="Invalide">❌ Invalide</button>
+                            <button type="submit" class="btn btn-warning btn-sm" name="statut" value="En attente">🟡 En attente</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="text-center mt-4">
+        <a th:href="@{'/MenuApplication'}" class="btn btn-outline-secondary btn-lg">
+            ↩ Retour au menu principal
+        </a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
