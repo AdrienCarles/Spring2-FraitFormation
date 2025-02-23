@@ -1,10 +1,6 @@
-Voici un fichier **README.md** détaillé pour expliquer comment mettre en place et exécuter le projet **Spring2-FraitFormation**.
-
----
-
 # Spring2-FraitFormation
 
-Projet de déclaration de frais réalisé avec **Spring Boot**, **Thymeleaf**, **Spring Security** et **Spring Webflow**.
+Projet de déclaration de frais réalisé.
 
 ## 🛠 Prérequis
 
